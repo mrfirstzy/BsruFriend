@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Bind Widget คือ การ Initial Var กับ View บน XML
         signInButton = (Button) findViewById(R.id.button);
-        signUPButton = (Button) findViewById(R.id.button);
+        signUPButton = (Button) findViewById(R.id.button2);
         userEditText = (EditText) findViewById(R.id.editText);
         passEditText = (EditText) findViewById(R.id.editText3);
 
