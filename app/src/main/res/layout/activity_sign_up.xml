@@ -94,7 +94,7 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/linTop"
         android:layout_marginTop="20dp"
         android:background="#82ffffff"
@@ -145,7 +145,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginLeft="20dp">
+            android:layout_marginLeft="20dp"
+            android:id="@+id/ragAvata">
 
             <RadioButton
                 android:layout_width="wrap_content"
