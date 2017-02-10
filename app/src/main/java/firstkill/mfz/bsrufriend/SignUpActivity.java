@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +16,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 
+import org.jibble.simpleftp.SimpleFTP;
+
+import java.io.File;
+
 public class SignUpActivity extends AppCompatActivity {
 
     //Explicit
@@ -22,9 +27,10 @@ public class SignUpActivity extends AppCompatActivity {
     private ImageView imageView;
     private RadioGroup radioGroup;
     private Button button;
-    private String nameString,userString, passString, pathImageString, nameImageString;
+    private String nameString, userString, passString, pathImageString, nameImageString;
     private Uri uri;
     private boolean aBoolean = true;
+    private int anInt = 0;
 
 
     @Override
@@ -41,7 +47,37 @@ public class SignUpActivity extends AppCompatActivity {
         //Image Controller
         ImageController();
 
+        //Radio Controller
+        radioController();
+
     }   // Main Method
+
+    private void radioController() {
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+                switch (checkedId) {
+                    case R.id.radioButton:
+                        anInt = 0;
+                        break;
+                    case R.id.radioButton2:
+                        anInt = 1;
+                        break;
+                    case R.id.radioButton3:
+                        anInt = 2;
+                        break;
+                    case R.id.radioButton4:
+                        anInt = 3;
+                        break;
+                    case R.id.radioButton5:
+                        anInt = 4;
+                        break;
+                }   //switch
+            }   //onChecked
+        });
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -62,7 +98,7 @@ public class SignUpActivity extends AppCompatActivity {
 
             //Find Path of Image Choose
             String[] strings = new String[]{MediaStore.Images.Media.DATA};
-            Cursor cursor = getContentResolver().query(uri, strings, null, null ,null);
+            Cursor cursor = getContentResolver().query(uri, strings, null, null, null);
 
             if (cursor != null) {
                 cursor.moveToFirst();
@@ -90,7 +126,7 @@ public class SignUpActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
-                startActivityForResult(Intent.createChooser(intent,"โปรดเลือกแอพดูภาพ"), 1);
+                startActivityForResult(Intent.createChooser(intent, "โปรดเลือกแอพดูภาพ"), 1);
 
             }   //onCick
         });
@@ -109,22 +145,74 @@ public class SignUpActivity extends AppCompatActivity {
                 passString = passEditText.getText().toString().trim();
 
                 //check Space
-                if (nameString.equals("")|| userString.equals("") || passString.equals("") ) {
+                if (nameString.equals("") || userString.equals("") || passString.equals("")) {
                     // Ture ==> Have Space
                     MyAlert myAlert = new MyAlert(SignUpActivity.this);
                     myAlert.mydialog("มีช่องว่าง", "กรุณากรอกให้ครบช่องครับ");
                 } else if (aBoolean) {
                     //Non Choose Image
                     MyAlert myAlert = new MyAlert(SignUpActivity.this);
-                    myAlert.mydialog("ยังไม่เลือกรูปภาพ","กรุณาเลือกรูปด้วยเว้ยเห้ย");
+                    myAlert.mydialog("ยังไม่เลือกรูปภาพ", "กรุณาเลือกรูปด้วยเว้ยเห้ย");
 
                 } else {
                     //EveryThing OK
-                }
-                }
 
-            });   //onClick
+                    uploadValueToServer();
+
+                }
+            }
+
+        });   //onClick
     }
+
+    private void uploadValueToServer() {
+
+        try {
+
+            //Upload Imge
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy
+                    .Builder()
+                    .permitAll()
+                    .build();
+            StrictMode.setThreadPolicy(policy);
+            SimpleFTP simpleFTP = new SimpleFTP();
+            simpleFTP.connect("ftp.swiftcodingthai.com", 21, "bsru@swiftcodingthai.com",
+                    "Abc12345");
+            simpleFTP.bin();
+            simpleFTP.cwd("Image_MFz");
+            simpleFTP.stor(new File(pathImageString));
+            simpleFTP.disconnect();
+
+            // Upload Text
+            String tag = "10febV2";
+            Log.d(tag, "name ==> " + nameString);
+            Log.d(tag, "user ==> " + userString);
+            Log.d(tag, "password ==> " + passString);
+
+            nameImageString = "http://swiftcodingthai.com/bsru/Image_MFz" + pathImageString.substring(pathImageString.lastIndexOf("/"));
+            Log.d(tag, "Image ==>" + nameImageString);
+            Log.d(tag, "Avata ==>" + anInt);
+
+            AddValueToUser addValueToUser = new AddValueToUser(SignUpActivity.this,
+                    nameString, userString, passString, nameImageString, Integer.toString(anInt));
+            addValueToUser.execute("http://swiftcodingthai.com/bsru/add_master.php");
+            String s = addValueToUser.get();
+            Log.d(tag, "Result ==>" + s);
+
+            if (Boolean.parseBoolean(s)) {
+                finish();
+            } else {
+                MyAlert myAlert = new MyAlert(SignUpActivity.this);
+                myAlert.mydialog("Cannot Upload", "Upload Fail");
+            }
+
+
+
+        } catch (Exception e) {
+            Log.d("10febV1", "e upload ==>" + e.toString());
+        }
+
+    }   // upload
 
     private void bindWidget() {
 
