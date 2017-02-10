@@ -1,11 +1,14 @@
 package firstkill.mfz.bsrufriend;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,7 +22,7 @@ public class SignUpActivity extends AppCompatActivity {
     private ImageView imageView;
     private RadioGroup radioGroup;
     private Button button;
-    private String nameString,userString, passString;
+    private String nameString,userString, passString, pathImageString, nameImageString;
     private Uri uri;
     private boolean aBoolean = true;
 
@@ -57,7 +60,24 @@ public class SignUpActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            //Find Path of Image Choose
+            String[] strings = new String[]{MediaStore.Images.Media.DATA};
+            Cursor cursor = getContentResolver().query(uri, strings, null, null ,null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                int index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                pathImageString = cursor.getString(index);
+
+            } else {
+                pathImageString = uri.getPath();
+            }
+
+            Log.d("10febV1", "pathImage ==>" + pathImageString);
+
+
         }   //if
+
 
     }   //onActivityResult
 
