@@ -1,5 +1,9 @@
 package firstkill.mfz.bsrufriend;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -16,6 +20,8 @@ public class SignUpActivity extends AppCompatActivity {
     private RadioGroup radioGroup;
     private Button button;
     private String nameString,userString, passString;
+    private Uri uri;
+    private boolean aBoolean = true;
 
 
     @Override
@@ -29,7 +35,47 @@ public class SignUpActivity extends AppCompatActivity {
         //Button Controller
         buttonController();
 
+        //Image Controller
+        ImageController();
+
     }   // Main Method
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+
+            aBoolean = false;
+            uri = data.getData();
+            // Setup image Choose to ImageView
+            try {
+
+                Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(uri));
+                imageView.setImageBitmap(bitmap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }   //if
+
+    }   //onActivityResult
+
+
+    private void ImageController() {
+
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent,"โปรดเลือกแอพดูภาพ"), 1);
+
+            }   //onCick
+        });
+
+    }
 
     private void buttonController() {
 
@@ -46,12 +92,18 @@ public class SignUpActivity extends AppCompatActivity {
                 if (nameString.equals("")|| userString.equals("") || passString.equals("") ) {
                     // Ture ==> Have Space
                     MyAlert myAlert = new MyAlert(SignUpActivity.this);
-                    myAlert.mydialog("มีช่องว่าง","กรุณากรอกให้ครบช่องครับ");
+                    myAlert.mydialog("มีช่องว่าง", "กรุณากรอกให้ครบช่องครับ");
+                } else if (aBoolean) {
+                    //Non Choose Image
+                    MyAlert myAlert = new MyAlert(SignUpActivity.this);
+                    myAlert.mydialog("ยังไม่เลือกรูปภาพ","กรุณาเลือกรูปด้วยเว้ยเห้ย");
 
+                } else {
+                    //EveryThing OK
+                }
                 }
 
-            }   //onClick
-        });
+            });   //onClick
     }
 
     private void bindWidget() {
